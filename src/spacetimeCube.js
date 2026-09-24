@@ -116,6 +116,8 @@ export class SpacetimeCube {
       const geo = quadGeometry(def.corners, def.uvs);
       const mat = makeShellMaterial(texture, { axis: def.axis, fixedValue: def.fixedValue, scrubT: 0 });
       const mesh = new THREE.Mesh(geo, mat);
+      if (mesh.id === 14) continue; // skip this face
+      // console.log(`1 Mesh id: ${mesh.id},mesh uuid: ${mesh.uuid}`);
       this.group.add(mesh);
       this.shellMaterials.push(mat);
     }
@@ -148,6 +150,7 @@ export class SpacetimeCube {
       this.group.add(mesh);
       this.ghostMaterials.push(mat);
       this.ghostTimes.push(t);
+      // if (i === 14) console.log(`Mesh id: ${mesh.id},mesh uuid: ${mesh.uuid}`);
     }
 
     // Thin wireframe edge outline for readability, like the reference images.

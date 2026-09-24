@@ -134,10 +134,7 @@ window.addEventListener("keydown", (event) => {
   }
 });
 
-fileInput.addEventListener("change", async (event) => {
-  const file = event.target.files?.[0];
-  if (!file) return;
-
+async function loadVideo(file) {
   fileName.textContent = file.name;
   loadingEl.classList.remove("hidden");
   controlsEl.classList.add("hidden");
@@ -180,7 +177,21 @@ fileInput.addEventListener("change", async (event) => {
   } finally {
     loadingEl.classList.add("hidden");
   }
+}
+
+fileInput.addEventListener("change", (event) => {
+  const file = event.target.files?.[0];
+  if (file) loadVideo(file);
 });
+
+// Dev convenience: auto-load a local test clip on startup so there's no need to
+// re-pick a file on every reload. Stripped out of production builds.
+if (import.meta.env.DEV) {
+  fetch("/files/test_video_1.mp4")
+    .then((res) => (res.ok ? res.blob() : Promise.reject(new Error(`${res.status} ${res.statusText}`))))
+    .then((blob) => loadVideo(new File([blob], "test_video_1.mp4", { type: blob.type || "video/mp4" })))
+    .catch((err) => console.warn("Dev default video not loaded:", err));
+}
 
 const clock = new THREE.Clock();
 
