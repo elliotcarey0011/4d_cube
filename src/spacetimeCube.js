@@ -13,15 +13,25 @@ function quadGeometry(corners, uvs) {
 }
 
 /**
- * Builds the spacetime cube: 6 outer "shell" faces sampling the video volume
- * (front/back = current frame, top/bottom/left/right = time-slices), plus a
- * stack of low-opacity internal frame planes you can fly through.
+ * Builds the spacetime cube as a progressive reveal: the top/bottom/left/right
+ * "shell" faces sample (x,t)/(y,t) time-slices of the video volume and are
+ * masked so only the portion up to the current scrub time is opaque (the rest
+ * stays transparent, so the cube fills in as you scrub). A stack of internal
+ * frame planes runs through the depth (time) axis at low "trail" opacity for
+ * already-revealed frames, with a brightness peak at whichever plane's time
+ * matches the current scrub position — that peak is the "current frame", and
+ * it sits at whatever depth in the cube corresponds to where you are in the
+ * video, not pinned to any face.
  */
 export class SpacetimeCube {
-  constructor(volumeResult, { width = 2.2, ghostCount = 48, ghostOpacity = 0.18 } = {}) {
+  constructor(volumeResult, { width = 2.2, ghostCount = 48, trailOpacity = 0.15 } = {}) {
     const { texture, aspect, frameCount } = volumeResult;
     this.texture = texture;
     this.frameCount = frameCount;
+    this.trailOpacity = trailOpacity;
+    this.peakOpacity = 0.9;
+    this.peakWidth = 0.05;
+    this._t = 0;
 
     const hw = width / 2;
     const hh = width / aspect / 2;
@@ -33,39 +43,6 @@ export class SpacetimeCube {
     this.shellMaterials = [];
 
     const faceDefs = [
-      // Front/back: axis 0, sample (u, v, scrubT)
-      {
-        axis: 0,
-        fixedValue: 0,
-        corners: [
-          [-hw, -hh, hd],
-          [hw, -hh, hd],
-          [hw, hh, hd],
-          [-hw, hh, hd],
-        ],
-        uvs: [
-          [0, 0],
-          [1, 0],
-          [1, 1],
-          [0, 1],
-        ],
-      },
-      {
-        axis: 0,
-        fixedValue: 0,
-        corners: [
-          [hw, -hh, -hd],
-          [-hw, -hh, -hd],
-          [-hw, hh, -hd],
-          [hw, hh, -hd],
-        ],
-        uvs: [
-          [1, 0],
-          [0, 0],
-          [0, 1],
-          [1, 1],
-        ],
-      },
       // Top/bottom: axis 1, sample (u, fixedValue, t)
       {
         axis: 1,
@@ -143,8 +120,10 @@ export class SpacetimeCube {
     }
 
     // Internal ghost stack: thin frame planes spanning the front/back (x,y) extent,
-    // distributed along the time (z) axis from back (t=0) to front (t=1).
+    // distributed along the time (z) axis from back (t=0) to front (t=1). Opacity
+    // is recomputed per-plane in setScrub() based on the current scrub position.
     this.ghostMaterials = [];
+    this.ghostTimes = [];
     const ghostGeo = quadGeometry(
       [
         [-hw, -hh, 0],
@@ -162,11 +141,12 @@ export class SpacetimeCube {
     for (let i = 0; i < ghostCount; i++) {
       const t = ghostCount === 1 ? 0.5 : i / (ghostCount - 1);
       const z = -hd + t * (2 * hd);
-      const mat = makeGhostMaterial(texture, t, ghostOpacity);
+      const mat = makeGhostMaterial(texture, t, 0);
       const mesh = new THREE.Mesh(ghostGeo, mat);
       mesh.position.z = z;
       this.group.add(mesh);
       this.ghostMaterials.push(mat);
+      this.ghostTimes.push(t);
     }
 
     // Thin wireframe edge outline for readability, like the reference images.
@@ -180,13 +160,26 @@ export class SpacetimeCube {
   }
 
   setScrub(t) {
-    for (const mat of this.shellMaterials) {
-      if (mat.uniforms.uAxis.value === 0) mat.uniforms.uScrubT.value = t;
+    this._t = t;
+
+    for (const mat of this.shellMaterials) mat.uniforms.uScrubT.value = t;
+
+    for (let i = 0; i < this.ghostMaterials.length; i++) {
+      const ti = this.ghostTimes[i];
+      let opacity;
+      if (ti > t + 1e-4) {
+        opacity = 0; // not yet revealed
+      } else {
+        const peak = Math.exp(-(((t - ti) / this.peakWidth) ** 2));
+        opacity = this.trailOpacity + (this.peakOpacity - this.trailOpacity) * peak;
+      }
+      this.ghostMaterials[i].uniforms.uOpacity.value = opacity;
     }
   }
 
-  setGhostOpacity(opacity) {
-    for (const mat of this.ghostMaterials) mat.uniforms.uOpacity.value = opacity;
+  setTrailOpacity(opacity) {
+    this.trailOpacity = opacity;
+    this.setScrub(this._t);
   }
 
   dispose() {

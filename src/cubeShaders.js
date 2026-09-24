@@ -1,9 +1,10 @@
 import * as THREE from "three";
 
-// Shell faces sample a Data3DTexture volume (x, y, t). Front/back faces show a
-// single (x,y) frame at the current scrub time; top/bottom/left/right faces
-// show (x,t) / (y,t) time-slices, which is what produces the "melting" motion
-// streaks on the outside of the cube.
+// Shell faces sample a Data3DTexture volume (x, y, t): the top/bottom/left/right
+// faces show (x,t) / (y,t) time-slices, which is what produces the "melting"
+// motion streaks on the outside of the cube. Each face is a progressive reveal
+// mask: only the portion of the slice up to the current scrub time is opaque,
+// the rest stays fully transparent, so the cube fills in as playback advances.
 const vertexShader = /* glsl */ `
   in vec3 position;
   in vec2 uv;
@@ -25,20 +26,20 @@ const fragmentShader = /* glsl */ `
   out vec4 fragColor;
 
   uniform sampler3D uVolume;
-  uniform int uAxis; // 0 = xy (front/back), 1 = xt (top/bottom), 2 = yt (left/right)
+  uniform int uAxis; // 1 = xt (top/bottom), 2 = yt (left/right)
   uniform float uFixedValue; // fixed y (axis 1) or x (axis 2), in [0,1]
-  uniform float uScrubT; // current scrub time, in [0,1], used by axis 0
+  uniform float uScrubT; // current scrub time, in [0,1]
 
   void main() {
-    vec3 coord;
-    if (uAxis == 0) {
-      coord = vec3(vUv.x, vUv.y, uScrubT);
-    } else if (uAxis == 1) {
-      coord = vec3(vUv.x, uFixedValue, vUv.y);
-    } else {
-      coord = vec3(uFixedValue, vUv.x, vUv.y);
-    }
-    fragColor = texture(uVolume, coord);
+    // On both remaining faces, vUv.y is the time coordinate being sampled.
+    vec3 coord = (uAxis == 1)
+      ? vec3(vUv.x, uFixedValue, vUv.y)
+      : vec3(uFixedValue, vUv.x, vUv.y);
+    vec4 c = texture(uVolume, coord);
+
+    const float edge = 0.015;
+    float revealed = 1.0 - smoothstep(uScrubT - edge, uScrubT + edge, vUv.y);
+    fragColor = vec4(c.rgb, revealed);
   }
 `;
 
@@ -54,7 +55,8 @@ export function makeShellMaterial(volumeTexture, { axis, fixedValue = 0, scrubT 
       uScrubT: { value: scrubT },
     },
     side: THREE.DoubleSide,
-    transparent: false,
+    transparent: true,
+    depthWrite: false,
   });
 }
 

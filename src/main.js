@@ -89,7 +89,7 @@ canvas.addEventListener(
 );
 
 scrubSlider.addEventListener("input", () => setScrub(parseFloat(scrubSlider.value)));
-opacitySlider.addEventListener("input", () => cube?.setGhostOpacity(parseFloat(opacitySlider.value)));
+opacitySlider.addEventListener("input", () => cube?.setTrailOpacity(parseFloat(opacitySlider.value)));
 
 playPauseBtn.addEventListener("click", () => {
   isPlaying = !isPlaying;
@@ -122,7 +122,7 @@ fileInput.addEventListener("change", async (event) => {
     });
     volumeInfo = volume;
 
-    cube = new SpacetimeCube(volume, { ghostCount: 48, ghostOpacity: parseFloat(opacitySlider.value) });
+    cube = new SpacetimeCube(volume, { ghostCount: 48, trailOpacity: parseFloat(opacitySlider.value) });
     scene.add(cube.group);
 
     scrubT = 0;
