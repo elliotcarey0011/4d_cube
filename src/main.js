@@ -14,7 +14,6 @@ const controlsEl = document.getElementById("controls");
 const scrubSlider = document.getElementById("scrubSlider");
 const scrubReadout = document.getElementById("scrubReadout");
 const opacitySlider = document.getElementById("opacitySlider");
-const flySlider = document.getElementById("flySlider");
 
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -26,13 +25,28 @@ const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerH
 const initialDistance = 4.2;
 camera.position.set(2.6, 1.9, 3.1).setLength(initialDistance);
 
+// Camera is driven directly by mouse/trackpad via OrbitControls: drag to orbit,
+// scroll/pinch to zoom (including flying all the way through the cube's faces
+// to the inside). Shift+scroll is reserved for scrubbing frames instead.
 const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true;
 controls.dampingFactor = 0.08;
-controls.enableZoom = false; // wheel is repurposed for scrubbing / shift+wheel for flying inside
+controls.enableZoom = true;
+controls.zoomSpeed = 1.1;
 controls.minDistance = 0.02;
 controls.maxDistance = 20;
 controls.target.set(0, 0, 0);
+
+// While Shift is held, hand the wheel over to frame-scrubbing instead of camera zoom.
+window.addEventListener("keydown", (event) => {
+  if (event.key === "Shift") controls.enableZoom = false;
+});
+window.addEventListener("keyup", (event) => {
+  if (event.key === "Shift") controls.enableZoom = true;
+});
+window.addEventListener("blur", () => {
+  controls.enableZoom = true;
+});
 
 function resize() {
   const w = window.innerWidth;
@@ -48,19 +62,6 @@ let cube = null;
 let scrubT = 0;
 let isPlaying = false;
 let volumeInfo = null;
-
-function setDistance(dist) {
-  dist = THREE.MathUtils.clamp(dist, controls.minDistance, controls.maxDistance);
-  const dir = new THREE.Vector3().subVectors(camera.position, controls.target);
-  if (dir.lengthSq() < 1e-8) dir.set(0, 0, 1);
-  dir.setLength(dist);
-  camera.position.copy(controls.target).add(dir);
-  flySlider.value = String(dist);
-}
-
-function currentDistance() {
-  return camera.position.distanceTo(controls.target);
-}
 
 function updateScrubUI() {
   scrubSlider.value = String(scrubT);
@@ -80,22 +81,15 @@ function setScrub(t) {
 canvas.addEventListener(
   "wheel",
   (event) => {
-    if (!cube) return;
+    if (!cube || !event.shiftKey) return; // plain scroll/pinch is left to OrbitControls for zoom
     event.preventDefault();
-    if (event.shiftKey) {
-      const dist = currentDistance();
-      const delta = event.deltaY * 0.0025 * Math.max(dist, 0.05);
-      setDistance(dist + delta);
-    } else {
-      setScrub(scrubT + event.deltaY * 0.00045);
-    }
+    setScrub(scrubT + event.deltaY * 0.00045);
   },
   { passive: false }
 );
 
 scrubSlider.addEventListener("input", () => setScrub(parseFloat(scrubSlider.value)));
 opacitySlider.addEventListener("input", () => cube?.setGhostOpacity(parseFloat(opacitySlider.value)));
-flySlider.addEventListener("input", () => setDistance(parseFloat(flySlider.value)));
 
 playPauseBtn.addEventListener("click", () => {
   isPlaying = !isPlaying;
@@ -133,7 +127,8 @@ fileInput.addEventListener("change", async (event) => {
 
     scrubT = 0;
     setScrub(0);
-    setDistance(initialDistance);
+    camera.position.set(2.6, 1.9, 3.1).setLength(initialDistance);
+    controls.target.set(0, 0, 0);
 
     controlsEl.classList.remove("hidden");
     playPauseBtn.disabled = false;
