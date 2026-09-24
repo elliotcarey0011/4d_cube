@@ -91,9 +91,47 @@ canvas.addEventListener(
 scrubSlider.addEventListener("input", () => setScrub(parseFloat(scrubSlider.value)));
 opacitySlider.addEventListener("input", () => cube?.setTrailOpacity(parseFloat(opacitySlider.value)));
 
-playPauseBtn.addEventListener("click", () => {
+function togglePlay() {
+  if (!cube) return;
   isPlaying = !isPlaying;
   playPauseBtn.textContent = isPlaying ? "Pause" : "Play";
+}
+playPauseBtn.addEventListener("click", togglePlay);
+
+// Keyboard shortcuts for moving through the video. Ignored while a form control
+// (e.g. a slider) has focus so native input keybinds aren't double-handled.
+window.addEventListener("keydown", (event) => {
+  if (!cube || !volumeInfo) return;
+  if (event.target instanceof HTMLInputElement) return;
+
+  const frameStep = 1 / Math.max(volumeInfo.frameCount - 1, 1);
+  const bigStep = frameStep * 10;
+
+  switch (event.key) {
+    case " ":
+    case "k":
+      event.preventDefault();
+      togglePlay();
+      break;
+    case "ArrowRight":
+    case "l":
+      event.preventDefault();
+      setScrub(scrubT + (event.shiftKey ? bigStep : frameStep));
+      break;
+    case "ArrowLeft":
+    case "j":
+      event.preventDefault();
+      setScrub(scrubT - (event.shiftKey ? bigStep : frameStep));
+      break;
+    case "Home":
+      event.preventDefault();
+      setScrub(0);
+      break;
+    case "End":
+      event.preventDefault();
+      setScrub(1);
+      break;
+  }
 });
 
 fileInput.addEventListener("change", async (event) => {

@@ -3,8 +3,9 @@ import * as THREE from "three";
 // Shell faces sample a Data3DTexture volume (x, y, t): the top/bottom/left/right
 // faces show (x,t) / (y,t) time-slices, which is what produces the "melting"
 // motion streaks on the outside of the cube. Each face is a progressive reveal
-// mask: only the portion of the slice up to the current scrub time is opaque,
-// the rest stays fully transparent, so the cube fills in as playback advances.
+// mask: the cube starts full (whole video visible) and empties out behind the
+// current scrub position as playback advances — only the "remaining" portion
+// (time >= scrub position) stays opaque, the already-passed portion is transparent.
 const vertexShader = /* glsl */ `
   in vec3 position;
   in vec2 uv;
@@ -38,7 +39,7 @@ const fragmentShader = /* glsl */ `
     vec4 c = texture(uVolume, coord);
 
     const float edge = 0.015;
-    float revealed = 1.0 - smoothstep(uScrubT - edge, uScrubT + edge, vUv.y);
+    float revealed = smoothstep(uScrubT - edge, uScrubT + edge, vUv.y);
     fragColor = vec4(c.rgb, revealed);
   }
 `;

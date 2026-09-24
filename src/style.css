@@ -41,7 +41,6 @@ body {
   pointer-events: none;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
 }
 
 #topbar {
@@ -132,6 +131,7 @@ body {
 
 #controls {
   pointer-events: auto;
+  margin-top: auto;
   display: flex;
   flex-direction: column;
   gap: 8px;

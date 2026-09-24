@@ -13,15 +13,16 @@ function quadGeometry(corners, uvs) {
 }
 
 /**
- * Builds the spacetime cube as a progressive reveal: the top/bottom/left/right
- * "shell" faces sample (x,t)/(y,t) time-slices of the video volume and are
- * masked so only the portion up to the current scrub time is opaque (the rest
- * stays transparent, so the cube fills in as you scrub). A stack of internal
- * frame planes runs through the depth (time) axis at low "trail" opacity for
- * already-revealed frames, with a brightness peak at whichever plane's time
- * matches the current scrub position — that peak is the "current frame", and
- * it sits at whatever depth in the cube corresponds to where you are in the
- * video, not pinned to any face.
+ * Builds the spacetime cube as a progressive "empty out" effect: the cube
+ * starts full (the whole video visible via (x,t)/(y,t) time-slices on the
+ * top/bottom/left/right "shell" faces) and empties out behind the current
+ * scrub position as playback advances — only the portion of each slice from
+ * the scrub time onward stays opaque, the already-passed portion goes fully
+ * transparent. A stack of internal frame planes runs through the depth (time)
+ * axis at low "trail" opacity for the remaining (not-yet-passed) frames, with
+ * a brightness peak at whichever plane's time matches the current scrub
+ * position — that peak is the "current frame", and it sits at whatever depth
+ * in the cube corresponds to where you are in the video, not pinned to any face.
  */
 export class SpacetimeCube {
   constructor(volumeResult, { width = 2.2, ghostCount = 48, trailOpacity = 0.15 } = {}) {
@@ -167,8 +168,8 @@ export class SpacetimeCube {
     for (let i = 0; i < this.ghostMaterials.length; i++) {
       const ti = this.ghostTimes[i];
       let opacity;
-      if (ti > t + 1e-4) {
-        opacity = 0; // not yet revealed
+      if (ti < t - 1e-4) {
+        opacity = 0; // already scrubbed past / emptied out
       } else {
         const peak = Math.exp(-(((t - ti) / this.peakWidth) ** 2));
         opacity = this.trailOpacity + (this.peakOpacity - this.trailOpacity) * peak;
