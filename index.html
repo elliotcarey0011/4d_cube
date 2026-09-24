@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>4D Cube — spacetime video cube</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="scene"></canvas>
+
+      <div id="hud">
+        <div id="topbar">
+          <label class="btn" for="fileInput">Import video</label>
+          <input id="fileInput" type="file" accept="video/*" hidden />
+          <span id="fileName" class="filename"></span>
+          <div class="spacer"></div>
+          <button id="playPauseBtn" class="btn" disabled>Play</button>
+        </div>
+
+        <div id="loading" class="hidden">
+          <div class="loadingBox">
+            <div id="loadingLabel">Extracting frames…</div>
+            <div class="progressTrack"><div id="progressFill" class="progressFill"></div></div>
+          </div>
+        </div>
+
+        <div id="controls" class="hidden">
+          <div class="row">
+            <span class="label">Time</span>
+            <input id="scrubSlider" type="range" min="0" max="1" step="0.001" value="0" />
+            <span id="scrubReadout" class="readout">0 / 0</span>
+          </div>
+          <div class="row">
+            <span class="label">Ghost opacity</span>
+            <input id="opacitySlider" type="range" min="0" max="1" step="0.01" value="0.18" />
+          </div>
+          <div class="row">
+            <span class="label">Distance</span>
+            <input id="flySlider" type="range" min="0.05" max="6" step="0.01" value="4.2" />
+          </div>
+        </div>
+
+        <div id="hint" class="hint">
+          Scroll = scrub through frames &nbsp;·&nbsp; Drag = orbit &nbsp;·&nbsp; Shift+Scroll = fly inside the cube
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
