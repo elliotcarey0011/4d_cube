@@ -27,6 +27,7 @@ const cameraAngleData = {
   top: { position: { x: 6.839953855022529e-7, y: 4.181084720495978, z: 0.000004124945316656096 }, rotation: { x: -1.5707953402218915, y: 1.635928069537725e-7, z: 0.16432406181140152 }, quaternion: { x: -0.7047210738653937, y: 0.05803201498745092, z: 0.05803195695288546, w: 0.7047217786181443 } },
   side: { position: { x: 3.995191373531822, y: 0.27019467522747037, z: 1.2670598748029005 }, rotation: { x: -0.21009846853832595, y: 1.257218536946953, z: 0.20013126611614884 }, quaternion: { x: -0.025969538638100958, y: 0.5903262841656844, z: 0.01900814183279582, w: 0.8065228774375369 } },
   front: { position: { x: 0.010609190706706788, y: 0.12755578234996182, z: 4.198049185926895 }, rotation: { x: -0.030375239798919502, y: 0.002526044433327428, z: 0.00007675273054140423 }, quaternion: { x: -0.015186975444693626, y: 0.001263459038798053, z: 0.000019190349919260052, w: 0.9998838727971513 } },
+  back: { position: { x: 0.3941275844469985, y: 0.07683629124770976, z: -4.180760652264704 }, rotation: { x: -3.1232161789789163, y: 0.09397817424683143, z: 3.1398680146019644 }, quaternion: { x: -0.0004297494263594133, y: 0.9988540517891095, z: 0.009137459940846937, w: 0.04697771137187151 } },
   inside: { position: { x: 1.7947030376558417, y: 0.13907425204857435, z: 1.5840628054600756 }, rotation: { x: -0.08757137741386092, y: 0.845754716264015, z: 0.06561843109175682 }, quaternion: { x: -0.026445324978521617, y: 0.41108144297754445, z: 0.011931448638151624, w: 0.9111368352556467 }, zoom: 2 }
 };
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
@@ -141,6 +142,7 @@ cameraAngleBtnTop.addEventListener("click", () => applyCameraAngle("top"));
 cameraAngleBtnFront.addEventListener("click", () => applyCameraAngle("front"));
 cameraAngleBtnSide.addEventListener("click", () => applyCameraAngle("side"));
 cameraAngleBtnInside.addEventListener("click", () => applyCameraAngle("inside"));
+cameraAngleBtnBack.addEventListener("click", () => applyCameraAngle("back"));
 // Keyboard shortcuts for moving through the video. Ignored while a form control
 // (e.g. a slider) has focus so native input keybinds aren't double-handled.
 window.addEventListener("keydown", (event) => {
@@ -234,7 +236,7 @@ fileInput.addEventListener("change", (event) => {
 // Dev convenience: auto-load a local test clip on startup so there's no need to
 // re-pick a file on every reload. Stripped out of production builds.
 if (import.meta.env.DEV) {
-  fetch("/files/test_video_1.mp4")
+  fetch("/files/test_video_2.mp4")
     .then((res) => (res.ok ? res.blob() : Promise.reject(new Error(`${res.status} ${res.statusText}`))))
     .then((blob) => loadVideo(new File([blob], "test_video_1.mp4", { type: blob.type || "video/mp4" })))
     .catch((err) => console.warn("Dev default video not loaded:", err));

@@ -44,90 +44,94 @@ export class SpacetimeCube {
     this.group = new THREE.Group();
     this.shellMaterials = [];
 
-    // const faceDefs = [
-    //   // Top/bottom: axis 1, sample (u, fixedValue, t)
-    //   {
-    //     axis: 1,
-    //     fixedValue: 1,
-    //     corners: [
-    //       [-hw, hh, -hd],
-    //       [-hw, hh, hd],
-    //       [hw, hh, hd],
-    //       [hw, hh, -hd],
-    //     ],
-    //     uvs: [
-    //       [0, 0],
-    //       [0, 1],
-    //       [1, 1],
-    //       [1, 0],
-    //     ],
-    //   },
-    //   {
-    //     axis: 1,
-    //     fixedValue: 0,
-    //     corners: [
-    //       [-hw, -hh, hd],
-    //       [-hw, -hh, -hd],
-    //       [hw, -hh, -hd],
-    //       [hw, -hh, hd],
-    //     ],
-    //     uvs: [
-    //       [0, 1],
-    //       [0, 0],
-    //       [1, 0],
-    //       [1, 1],
-    //     ],
-    //   },
-    //   // Left/right: axis 2, sample (fixedValue, v, t)
-    //   {
-    //     axis: 2,
-    //     fixedValue: 1,
-    //     corners: [
-    //       [hw, -hh, hd],
-    //       [hw, -hh, -hd],
-    //       [hw, hh, -hd],
-    //       [hw, hh, hd],
-    //     ],
-    //     uvs: [
-    //       [0, 0],
-    //       [0, 1],
-    //       [1, 1],
-    //       [1, 0],
-    //     ],
-    //   },
-    //   {
-    //     axis: 2,
-    //     fixedValue: 0,
-    //     corners: [
-    //       [-hw, -hh, -hd],
-    //       [-hw, -hh, hd],
-    //       [-hw, hh, hd],
-    //       [-hw, hh, -hd],
-    //     ],
-    //     uvs: [
-    //       [0, 0],
-    //       [0, 1],
-    //       [1, 1],
-    //       [1, 0],
-    //     ],
-    //   },
-    // ];
+    const faceDefs = [
+      // Top/bottom: axis 1, sample (u, fixedValue, t)
+      {
+        axis: 1,
+        fixedValue: 1,
+        corners: [
+          [-hw, hh, -hd],
+          [-hw, hh, hd],
+          [hw, hh, hd],
+          [hw, hh, -hd],
+        ],
+        uvs: [
+          [0, 0],
+          [0, 1],
+          [1, 1],
+          [1, 0],
+        ],
+      },
+      {
+        axis: 1,
+        fixedValue: 0,
+        corners: [
+          [-hw, -hh, hd],
+          [-hw, -hh, -hd],
+          [hw, -hh, -hd],
+          [hw, -hh, hd],
+        ],
+        uvs: [
+          [0, 1],
+          [0, 0],
+          [1, 0],
+          [1, 1],
+        ],
+      },
+      // Left/right: axis 2, sample (fixedValue, v, t)
+      {
+        axis: 2,
+        fixedValue: 1,
+        corners: [
+          [hw, -hh, hd],
+          [hw, -hh, -hd],
+          [hw, hh, -hd],
+          [hw, hh, hd],
+        ],
+        uvs: [
+          [0, 0],
+          [0, 1],
+          [1, 1],
+          [1, 0],
+        ],
+      },
+      {
+        axis: 2,
+        fixedValue: 0,
+        corners: [
+          [-hw, -hh, -hd],
+          [-hw, -hh, hd],
+          [-hw, hh, hd],
+          [-hw, hh, -hd],
+        ],
+        uvs: [
+          [0, 0],
+          [0, 1],
+          [1, 1],
+          [1, 0],
+        ],
+      },
+    ];
 
-    // for (const def of faceDefs) {
-    //   const geo = quadGeometry(def.corners, def.uvs);
-    //   const mat = makeShellMaterial(texture, { axis: def.axis, fixedValue: def.fixedValue, scrubT: 0 });
-    //   const mesh = new THREE.Mesh(geo, mat);
-    //   console.log('✌️mes--->', mesh.id, mesh.uuid);
+    for (const def of faceDefs) {
+      const geo = quadGeometry(def.corners, def.uvs);
+      const mat = makeShellMaterial(texture, { axis: def.axis, fixedValue: def.fixedValue, scrubT: 0 });
+      const mesh = new THREE.Mesh(geo, mat);
+      console.log('✌️mesh position  --->', mesh.position);
 
-    //   if (mesh.id === 12) continue;
-    //   if (mesh.id === 13) continue;
-    //   if (mesh.id === 14) continue;
-    //   if (mesh.id === 15) continue;
-    //   if (mesh.id === 16) continue;
-    //   // console.log(`1 Mesh id: ${mesh.id},mesh uuid: ${mesh.uuid}`);
-    //   this.group.add(mesh);
-    //   // this.shellMaterials.push(mat);
-    // }
+
+      // if (mesh.id === 12) continue;
+      // if (mesh.id === 13) continue;
+      if (mesh.id === 14) {
+        console.log(`Skipping mesh with id: ${mesh}`);
+
+      }
+      // if (mesh.id === 15) continue;
+      // if (mesh.id === 16) continue;
+      // console.log(`1 Mesh id: ${mesh.id},mesh uuid: ${mesh.uuid}`);
+      this.group.add(mesh);
+      this.shellMaterials.push(mat);
+    }
 
     // Internal ghost stack: thin frame planes spanning the front/back (x,y) extent,
     // distributed along the time (z) axis from back (t=0) to front (t=1). Opacity
@@ -174,6 +178,11 @@ export class SpacetimeCube {
     this._t = t;
 
     for (const mat of this.shellMaterials) mat.uniforms.uScrubT.value = t;
+    if (this.shellMaterials[2].uuid) {
+      console.log('✌️this.shellMaterials --->', this.shellMaterials[2]);
+    }
+
+
 
     for (let i = 0; i < this.ghostMaterials.length; i++) {
       const ti = this.ghostTimes[i];
