@@ -191,6 +191,7 @@ async function loadVideo(file) {
         progressFill.style.width = `${Math.round(p * 100)}%`;
         loadingLabel.textContent = `Extracting frames… ${Math.round(p * 100)}%`;
       },
+      anisotropy: renderer.capabilities.getMaxAnisotropy(),
     });
     volumeInfo = volume;
 
@@ -200,15 +201,15 @@ async function loadVideo(file) {
     scrubT = 0;
     setScrub(0);
     // camera.position.set(2.6, 1.9, 3.1).setLength(initialDistance);
-    camera.position.set(0.010609190706706788, 0.12755578234996182, 4.198049185926895).setLength(initialDistance);
-    camera.rotation.set(-0.030375239798919502, 0.002526044433327428, 0.00007675273054140423);
-    camera.quaternion.set(
-      -0.015186975444693626,
-      0.001263459038798053,
-      0.000019190349919260052,
-      0.9998838727971513
-    );
-    controls.target.set(0, 0, 0);
+    // camera.position.set(0.010609190706706788, 0.12755578234996182, 4.198049185926895).setLength(initialDistance);
+    // camera.rotation.set(-0.030375239798919502, 0.002526044433327428, 0.00007675273054140423);
+    // camera.quaternion.set(
+    //   -0.015186975444693626,
+    //   0.001263459038798053,
+    //   0.000019190349919260052,
+    //   0.9998838727971513
+    // );
+    // controls.target.set(0, 0, 0);
 
     controlsEl.classList.remove("hidden");
     playPauseBtn.disabled = false;

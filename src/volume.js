@@ -5,7 +5,7 @@ import * as THREE from "three";
  * THREE.Data3DTexture with axes (x, y, t) so the cube shader can read
  * arbitrary (x,y) images or (x,t)/(y,t) time-slices out of it.
  */
-export async function buildVideoVolume(file, { onProgress } = {}) {
+export async function buildVideoVolume(file, { onProgress, anisotropy } = {}) {
   const url = URL.createObjectURL(file);
   const video = document.createElement("video");
   video.muted = true;
@@ -21,17 +21,21 @@ export async function buildVideoVolume(file, { onProgress } = {}) {
   const duration = Math.max(video.duration || 0, 0.05);
   const srcAspect = video.videoWidth / video.videoHeight || 16 / 9;
 
-  // Sample at ~10fps, clamped to a sane frame-count range for GPU memory / extraction time.
-  const frameCount = Math.min(140, Math.max(24, Math.round(duration * 10)));
+  // Sample at ~12fps, clamped to a sane frame-count range for GPU memory / extraction time.
+  const frameCount = Math.min(180, Math.max(24, Math.round(duration * 12)));
 
-  // Downsample resolution used for the volume texture (keeps memory + extraction time reasonable).
-  const texW = 160;
+  // Downsample resolution used for the volume texture — capped for memory/extraction
+  // time, but never upscaled past the source video's own resolution.
+  const maxTexW = 384;
+  const texW = Math.max(2, Math.min(maxTexW, video.videoWidth || maxTexW));
   const texH = Math.max(2, Math.round(texW / srcAspect));
 
   const canvas = document.createElement("canvas");
   canvas.width = texW;
   canvas.height = texH;
   const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
 
   const data = new Uint8Array(texW * texH * 4 * frameCount);
 
@@ -68,6 +72,9 @@ export async function buildVideoVolume(file, { onProgress } = {}) {
   texture.wrapS = THREE.ClampToEdgeWrapping;
   texture.wrapT = THREE.ClampToEdgeWrapping;
   texture.wrapR = THREE.ClampToEdgeWrapping;
+  // Sharpens the shell faces, which are mostly viewed at steep/grazing angles
+  // (the time-slice surfaces recede directly away from the camera).
+  if (anisotropy) texture.anisotropy = anisotropy;
   texture.needsUpdate = true;
 
   return {
