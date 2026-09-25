@@ -30,6 +30,7 @@ const fragmentShader = /* glsl */ `
   uniform int uAxis; // 1 = xt (top/bottom), 2 = yt (left/right)
   uniform float uFixedValue; // fixed y (axis 1) or x (axis 2), in [0,1]
   uniform float uScrubT; // current scrub time, in [0,1]
+  uniform float uOpacity; // overall shell opacity, in [0,1]
 
   void main() {
     // On both remaining faces, vUv.y is the time coordinate being sampled.
@@ -40,11 +41,11 @@ const fragmentShader = /* glsl */ `
 
     const float edge = 0.015;
     float revealed = smoothstep(uScrubT - edge, uScrubT + edge, vUv.y);
-    fragColor = vec4(c.rgb, revealed);
+    fragColor = vec4(c.rgb, revealed * uOpacity);
   }
 `;
 
-export function makeShellMaterial(volumeTexture, { axis, fixedValue = 0, scrubT = 0 }) {
+export function makeShellMaterial(volumeTexture, { axis, fixedValue = 0, scrubT = 0, opacity = 1 }) {
   return new THREE.RawShaderMaterial({
     glslVersion: THREE.GLSL3,
     vertexShader,
@@ -54,6 +55,7 @@ export function makeShellMaterial(volumeTexture, { axis, fixedValue = 0, scrubT 
       uAxis: { value: axis },
       uFixedValue: { value: fixedValue },
       uScrubT: { value: scrubT },
+      uOpacity: { value: opacity },
     },
     side: THREE.DoubleSide,
     transparent: true,

@@ -23,8 +23,11 @@ const opacitySlider = document.getElementById("opacitySlider");
 const opacityReadout = document.getElementById("opacityReadout");
 const motionSlider = document.getElementById("motionSlider");
 const motionReadout = document.getElementById("motionReadout");
+const shellCheckbox = document.getElementById("shellCheckbox");
+const shellOpacitySlider = document.getElementById("shellOpacitySlider");
+const shellOpacityReadout = document.getElementById("shellOpacityReadout");
 const cameraAngleData = {
-  default: { position: { x: 0.010609190706706788, y: 0.12755578234996182, z: 4.198049185926895 }, rotation: { x: -0.030375239798919502, y: 0.002526044433327428, z: 0.00007675273054140423 }, quaternion: { x: -0.015186975444693626, y: 0.001263459038798053, z: 0.000019190349919260052, w: 0.9998838727971513 } },
+  default: { position: { x: 2.192191795308033, y: 1.7206659592649027, z: -3.1422291115084273 }, rotation: { isEuler: true, _x: -2.6405984990564373, _y: 0.5491359703520355, _z: 2.863198083447849, _order: "XYZ" }, quaternion: { x: -0.062823399225291, y: 0.9328065794884673, z: 0.19984769819688167, w: 0.2932337008227625 } },
   top: { position: { x: 6.839953855022529e-7, y: 4.181084720495978, z: 0.000004124945316656096 }, rotation: { x: -1.5707953402218915, y: 1.635928069537725e-7, z: 0.16432406181140152 }, quaternion: { x: -0.7047210738653937, y: 0.05803201498745092, z: 0.05803195695288546, w: 0.7047217786181443 } },
   side: { position: { x: 3.995191373531822, y: 0.27019467522747037, z: 1.2670598748029005 }, rotation: { x: -0.21009846853832595, y: 1.257218536946953, z: 0.20013126611614884 }, quaternion: { x: -0.025969538638100958, y: 0.5903262841656844, z: 0.01900814183279582, w: 0.8065228774375369 } },
   front: { position: { x: 0.010609190706706788, y: 0.12755578234996182, z: 4.198049185926895 }, rotation: { x: -0.030375239798919502, y: 0.002526044433327428, z: 0.00007675273054140423 }, quaternion: { x: -0.015186975444693626, y: 0.001263459038798053, z: 0.000019190349919260052, w: 0.9998838727971513 } },
@@ -130,6 +133,13 @@ motionSlider.addEventListener("input", () => {
   cube?.setMotionThreshold(parseFloat(motionSlider.value));
   motionReadout.textContent = motionSlider.value;
 });
+shellCheckbox.addEventListener("change", () => {
+  cube?.setShellVisible(shellCheckbox.checked);
+});
+shellOpacitySlider.addEventListener("input", () => {
+  cube?.setShellOpacity(parseFloat(shellOpacitySlider.value));
+  shellOpacityReadout.textContent = shellOpacitySlider.value;
+});
 
 function togglePlay() {
   if (!cube) return;
@@ -208,6 +218,8 @@ async function loadVideo(file) {
       ghostCount: 48,
       trailOpacity: parseFloat(opacitySlider.value),
       motionThreshold: parseFloat(motionSlider.value),
+      shellOpacity: parseFloat(shellOpacitySlider.value),
+      shellVisible: shellCheckbox.checked,
     });
     scene.add(cube.group);
 
@@ -237,9 +249,9 @@ fileInput.addEventListener("change", (event) => {
 // Dev convenience: auto-load a local test clip on startup so there's no need to
 // re-pick a file on every reload. Stripped out of production builds.
 if (import.meta.env.DEV) {
-  fetch("/files/test_video_2.mp4")
+  fetch("/files/test_video_3.mp4")
     .then((res) => (res.ok ? res.blob() : Promise.reject(new Error(`${res.status} ${res.statusText}`))))
-    .then((blob) => loadVideo(new File([blob], "test_video_1.mp4", { type: blob.type || "video/mp4" })))
+    .then((blob) => loadVideo(new File([blob], "test_video_3.mp4", { type: blob.type || "video/mp4" })))
     .catch((err) => console.warn("Dev default video not loaded:", err));
 }
 

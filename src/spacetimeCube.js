@@ -25,7 +25,10 @@ function quadGeometry(corners, uvs) {
  * in the cube corresponds to where you are in the video, not pinned to any face.
  */
 export class SpacetimeCube {
-  constructor(volumeResult, { width = 2.2, ghostCount = 48, trailOpacity = 0.15, motionThreshold = 0.12 } = {}) {
+  constructor(
+    volumeResult,
+    { width = 2.2, ghostCount = 48, trailOpacity = 0.15, motionThreshold = 0.12, shellOpacity = 0.5, shellVisible = true } = {}
+  ) {
     const { texture, aspect, frameCount } = volumeResult;
     this.texture = texture;
     this.frameCount = frameCount;
@@ -33,6 +36,7 @@ export class SpacetimeCube {
     this.peakOpacity = 0.9;
     this.peakWidth = 0.05;
     this.motionThreshold = motionThreshold;
+    this.shellOpacity = shellOpacity;
     this._t = 0;
 
     const hw = width / 2;
@@ -43,6 +47,7 @@ export class SpacetimeCube {
 
     this.group = new THREE.Group();
     this.shellMaterials = [];
+    this.shellMeshes = [];
 
     const faceDefs = [
       // Top/bottom: axis 1, sample (u, fixedValue, t)
@@ -115,17 +120,13 @@ export class SpacetimeCube {
 
     for (const def of faceDefs) {
       const geo = quadGeometry(def.corners, def.uvs);
-      const mat = makeShellMaterial(texture, { axis: def.axis, fixedValue: def.fixedValue, scrubT: 0 });
+      const mat = makeShellMaterial(texture, { axis: def.axis, fixedValue: def.fixedValue, scrubT: 0, opacity: shellOpacity });
       const mesh = new THREE.Mesh(geo, mat);
+      mesh.visible = shellVisible;
 
-
-      // if (mesh.id === 12) continue;
-      // if (mesh.id === 13) continue;
-      // if (mesh.id === 15) continue;
-      // if (mesh.id === 16) continue;
-      // console.log(`1 Mesh id: ${mesh.id},mesh uuid: ${mesh.uuid}`);
       this.group.add(mesh);
       this.shellMaterials.push(mat);
+      this.shellMeshes.push(mesh);
     }
 
     // Internal ghost stack: thin frame planes spanning the front/back (x,y) extent,
@@ -190,6 +191,15 @@ export class SpacetimeCube {
   setTrailOpacity(opacity) {
     this.trailOpacity = opacity;
     this.setScrub(this._t);
+  }
+
+  setShellOpacity(opacity) {
+    this.shellOpacity = opacity;
+    for (const mat of this.shellMaterials) mat.uniforms.uOpacity.value = opacity;
+  }
+
+  setShellVisible(visible) {
+    for (const mesh of this.shellMeshes) mesh.visible = visible;
   }
 
   // Lower = show more of the frame (less filtering); higher = only pixels that
