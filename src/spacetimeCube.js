@@ -116,7 +116,11 @@ export class SpacetimeCube {
       const geo = quadGeometry(def.corners, def.uvs);
       const mat = makeShellMaterial(texture, { axis: def.axis, fixedValue: def.fixedValue, scrubT: 0 });
       const mesh = new THREE.Mesh(geo, mat);
+      if (mesh.id === 12) continue;
+      if (mesh.id === 13) continue;
       if (mesh.id === 14) continue;
+      if (mesh.id === 15) continue;
+      if (mesh.id === 16) continue;
       // console.log(`1 Mesh id: ${mesh.id},mesh uuid: ${mesh.uuid}`);
       this.group.add(mesh);
       this.shellMaterials.push(mat);

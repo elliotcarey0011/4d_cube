@@ -7,6 +7,11 @@ const canvas = document.getElementById("scene");
 const fileInput = document.getElementById("fileInput");
 const fileName = document.getElementById("fileName");
 const playPauseBtn = document.getElementById("playPauseBtn");
+const cameraAngleBtnDefault = document.getElementById("cameraAngleBtnDefault");
+const cameraAngleBtnTop = document.getElementById("cameraAngleBtnTop");
+const cameraAngleBtnSide = document.getElementById("cameraAngleBtnSide");
+const cameraAngleBtnFront = document.getElementById("cameraAngleBtnFront");
+const cameraAngleBtnInside = document.getElementById("cameraAngleBtnInside");
 const loadingEl = document.getElementById("loading");
 const loadingLabel = document.getElementById("loadingLabel");
 const progressFill = document.getElementById("progressFill");
@@ -15,8 +20,13 @@ const scrubSlider = document.getElementById("scrubSlider");
 const scrubReadout = document.getElementById("scrubReadout");
 const opacitySlider = document.getElementById("opacitySlider");
 const opacityReadout = document.getElementById("opacityReadout");
-
-
+const cameraAngleData = {
+  default: { position: { x: 0.010609190706706788, y: 0.12755578234996182, z: 4.198049185926895 }, rotation: { x: -0.030375239798919502, y: 0.002526044433327428, z: 0.00007675273054140423 }, quaternion: { x: -0.015186975444693626, y: 0.001263459038798053, z: 0.000019190349919260052, w: 0.9998838727971513 } },
+  top: { position: { x: 6.839953855022529e-7, y: 4.181084720495978, z: 0.000004124945316656096 }, rotation: { x: -1.5707953402218915, y: 1.635928069537725e-7, z: 0.16432406181140152 }, quaternion: { x: -0.7047210738653937, y: 0.05803201498745092, z: 0.05803195695288546, w: 0.7047217786181443 } },
+  side: { position: { x: 3.995191373531822, y: 0.27019467522747037, z: 1.2670598748029005 }, rotation: { x: -0.21009846853832595, y: 1.257218536946953, z: 0.20013126611614884 }, quaternion: { x: -0.025969538638100958, y: 0.5903262841656844, z: 0.01900814183279582, w: 0.8065228774375369 } },
+  front: { position: { x: 0.010609190706706788, y: 0.12755578234996182, z: 4.198049185926895 }, rotation: { x: -0.030375239798919502, y: 0.002526044433327428, z: 0.00007675273054140423 }, quaternion: { x: -0.015186975444693626, y: 0.001263459038798053, z: 0.000019190349919260052, w: 0.9998838727971513 } },
+  inside: { position: { x: 0.7326603834680702, y: 0.15130194485527834, z: 2.2980786622064957 }, rotation: { x: -0.06574357000443642, y: 0.30800170730804705, z: 0.01995660573620204 }, quaternion: { x: -0.030945542352497368, y: 0.1536264139291691, z: 0.004813584281445624, w: 0.9876325874322591 } }
+};
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
@@ -25,18 +35,6 @@ scene.background = new THREE.Color(0x050505);
 
 const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.01, 100);
 const initialDistance = 4.2;
-// camera.position.set(2.6, 1.9, 3.1).setLength(initialDistance);
-camera.position.set(0.010609190706706788, 0.12755578234996182, 4.198049185926895).setLength(initialDistance);
-camera.rotation.set(-0.030375239798919502, 0.002526044433327428, 0.00007675273054140423);
-camera.quaternion.set(
-  -0.015186975444693626,
-  0.001263459038798053,
-  0.000019190349919260052,
-  0.9998838727971513
-);
-// controls.target.set(0, 0, 0);
-// controls.update();
-
 
 // Camera is driven directly by mouse/trackpad via OrbitControls: drag to orbit,
 // scroll/pinch to zoom (including flying all the way through the cube's faces
@@ -50,6 +48,16 @@ controls.minDistance = 0.02;
 controls.maxDistance = 20;
 controls.target.set(0, 0, 0);
 
+
+function applyCameraAngle(name, distance = initialDistance) {
+  const angle = cameraAngleData[name];
+  if (!angle) return;
+
+  camera.position.copy(angle.position).setLength(distance);
+  controls.target.set(0, 0, 0);
+
+}
+applyCameraAngle("default");
 // While Shift is held, hand the wheel over to frame-scrubbing instead of camera zoom.
 window.addEventListener("keydown", (event) => {
   if (event.key === "Shift") controls.enableZoom = false;
@@ -117,6 +125,11 @@ function togglePlay() {
 }
 playPauseBtn.addEventListener("click", togglePlay);
 
+cameraAngleBtnDefault.addEventListener("click", () => applyCameraAngle("default"));
+cameraAngleBtnTop.addEventListener("click", () => applyCameraAngle("top"));
+cameraAngleBtnFront.addEventListener("click", () => applyCameraAngle("front"));
+cameraAngleBtnSide.addEventListener("click", () => applyCameraAngle("side"));
+cameraAngleBtnInside.addEventListener("click", () => applyCameraAngle("inside"));
 // Keyboard shortcuts for moving through the video. Ignored while a form control
 // (e.g. a slider) has focus so native input keybinds aren't double-handled.
 window.addEventListener("keydown", (event) => {
