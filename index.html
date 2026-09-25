@@ -16,6 +16,14 @@
           <label class="btn" for="fileInput">Import video</label>
           <input id="fileInput" type="file" accept="video/*" hidden />
           <span id="fileName" class="filename"></span>
+          <div id="devTools" class="devTools hidden">
+            <label class="devLabel" for="devTestFileSelect">Dev test file</label>
+            <select id="devTestFileSelect" class="select">
+              <option value="test_video_1.mp4">test_video_1.mp4</option>
+              <option value="test_video_2.mp4">test_video_2.mp4</option>
+              <option value="test_video_3.mp4" selected>test_video_3.mp4</option>
+            </select>
+          </div>
           <div class="spacer"></div>
           <button id="playPauseBtn" class="btn" disabled>Play</button>
           <div class="cameraAngle">

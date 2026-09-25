@@ -6,6 +6,7 @@ import { bindControls } from "./ui/controls.js";
 import { bindKeyboardShortcuts } from "./ui/keyboardShortcuts.js";
 import { createScene, bindResize, bindShiftToDisableZoom } from "./sceneSetup.js";
 import { applyCameraAngle } from "./cameraAngles.js";
+import { bindDevTools } from "./dev/devTools.js";
 
 const INITIAL_CAMERA_DISTANCE = 4.2;
 
@@ -111,14 +112,7 @@ bindKeyboardShortcuts({
   onScrubTo: setScrub,
 });
 
-// Dev convenience: auto-load a local test clip on startup so there's no need to
-// re-pick a file on every reload. Stripped out of production builds.
-if (import.meta.env.DEV) {
-  fetch("/files/test_video_3.mp4")
-    .then((res) => (res.ok ? res.blob() : Promise.reject(new Error(`${res.status} ${res.statusText}`))))
-    .then((blob) => loadVideo(new File([blob], "test_video_3.mp4", { type: blob.type || "video/mp4" })))
-    .catch((err) => console.warn("Dev default video not loaded:", err));
-}
+bindDevTools(dom, { onFileSelected: loadVideo });
 
 const clock = new THREE.Clock();
 

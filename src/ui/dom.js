@@ -23,4 +23,6 @@ export const dom = {
   shellCheckbox: document.getElementById("shellCheckbox"),
   shellOpacitySlider: document.getElementById("shellOpacitySlider"),
   shellOpacityReadout: document.getElementById("shellOpacityReadout"),
+  devTools: document.getElementById("devTools"),
+  devTestFileSelect: document.getElementById("devTestFileSelect"),
 };

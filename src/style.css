@@ -91,6 +91,29 @@ body {
   white-space: nowrap;
 }
 
+.devTools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.devTools .devLabel {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.select {
+  pointer-events: auto;
+  cursor: pointer;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 7px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  backdrop-filter: blur(6px);
+}
+
 #loading {
   position: absolute;
   inset: 0;
