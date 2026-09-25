@@ -83,10 +83,10 @@ export class SpacetimeCube {
         axis: 2,
         fixedValue: 1,
         corners: [
-          [hw, -hh, hd],
           [hw, -hh, -hd],
-          [hw, hh, -hd],
+          [hw, -hh, hd],
           [hw, hh, hd],
+          [hw, hh, -hd],
         ],
         uvs: [
           [0, 0],
@@ -117,15 +117,10 @@ export class SpacetimeCube {
       const geo = quadGeometry(def.corners, def.uvs);
       const mat = makeShellMaterial(texture, { axis: def.axis, fixedValue: def.fixedValue, scrubT: 0 });
       const mesh = new THREE.Mesh(geo, mat);
-      console.log('✌️mesh position  --->', mesh.position);
 
 
       // if (mesh.id === 12) continue;
       // if (mesh.id === 13) continue;
-      if (mesh.id === 14) {
-        console.log(`Skipping mesh with id: ${mesh}`);
-
-      }
       // if (mesh.id === 15) continue;
       // if (mesh.id === 16) continue;
       // console.log(`1 Mesh id: ${mesh.id},mesh uuid: ${mesh.uuid}`);
@@ -178,11 +173,6 @@ export class SpacetimeCube {
     this._t = t;
 
     for (const mat of this.shellMaterials) mat.uniforms.uScrubT.value = t;
-    if (this.shellMaterials[2].uuid) {
-      console.log('✌️this.shellMaterials --->', this.shellMaterials[2]);
-    }
-
-
 
     for (let i = 0; i < this.ghostMaterials.length; i++) {
       const ti = this.ghostTimes[i];

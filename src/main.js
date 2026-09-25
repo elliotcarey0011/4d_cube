@@ -11,6 +11,7 @@ const cameraAngleBtnDefault = document.getElementById("cameraAngleBtnDefault");
 const cameraAngleBtnTop = document.getElementById("cameraAngleBtnTop");
 const cameraAngleBtnSide = document.getElementById("cameraAngleBtnSide");
 const cameraAngleBtnFront = document.getElementById("cameraAngleBtnFront");
+const cameraAngleBtnBack = document.getElementById("cameraAngleBtnBack");
 const cameraAngleBtnInside = document.getElementById("cameraAngleBtnInside");
 const loadingEl = document.getElementById("loading");
 const loadingLabel = document.getElementById("loadingLabel");
