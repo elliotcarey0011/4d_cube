@@ -14,6 +14,8 @@ const controlsEl = document.getElementById("controls");
 const scrubSlider = document.getElementById("scrubSlider");
 const scrubReadout = document.getElementById("scrubReadout");
 const opacitySlider = document.getElementById("opacitySlider");
+const opacityReadout = document.getElementById("opacityReadout");
+
 
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -24,8 +26,14 @@ scene.background = new THREE.Color(0x050505);
 const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.01, 100);
 const initialDistance = 4.2;
 // camera.position.set(2.6, 1.9, 3.1).setLength(initialDistance);
-camera.position.set(-0.3077470688101377, 0.5111020212327323, 4.157411029177814).setLength(initialDistance);
-camera.rotation.set(-3.11897818410284, 0.09298387281643143, 3.1394925464996564);
+camera.position.set(0.010609190706706788, 0.12755578234996182, 4.198049185926895).setLength(initialDistance);
+camera.rotation.set(-0.030375239798919502, 0.002526044433327428, 0.00007675273054140423);
+camera.quaternion.set(
+  -0.015186975444693626,
+  0.001263459038798053,
+  0.000019190349919260052,
+  0.9998838727971513
+);
 // controls.target.set(0, 0, 0);
 // controls.update();
 
@@ -77,6 +85,9 @@ function updateScrubUI() {
   }
 }
 
+function updateOpacityUI() {
+  opacityReadout.textContent = opacitySlider.value;
+}
 function setScrub(t) {
   scrubT = THREE.MathUtils.clamp(t, 0, 1);
   cube?.setScrub(scrubT);
@@ -94,7 +105,10 @@ canvas.addEventListener(
 );
 
 scrubSlider.addEventListener("input", () => setScrub(parseFloat(scrubSlider.value)));
-opacitySlider.addEventListener("input", () => cube?.setTrailOpacity(parseFloat(opacitySlider.value)));
+opacitySlider.addEventListener("input", () => {
+  cube?.setTrailOpacity(parseFloat(opacitySlider.value));
+  updateOpacityUI();
+});
 
 function togglePlay() {
   if (!cube) return;
@@ -168,8 +182,14 @@ async function loadVideo(file) {
     scrubT = 0;
     setScrub(0);
     // camera.position.set(2.6, 1.9, 3.1).setLength(initialDistance);
-    camera.position.set(-0.3077470688101377, 0.5111020212327323, 4.157411029177814).setLength(initialDistance);
-    camera.rotation.set(-3.11897818410284, 0.09298387281643143, 3.1394925464996564);
+    camera.position.set(0.010609190706706788, 0.12755578234996182, 4.198049185926895).setLength(initialDistance);
+    camera.rotation.set(-0.030375239798919502, 0.002526044433327428, 0.00007675273054140423);
+    camera.quaternion.set(
+      -0.015186975444693626,
+      0.001263459038798053,
+      0.000019190349919260052,
+      0.9998838727971513
+    );
     controls.target.set(0, 0, 0);
 
     controlsEl.classList.remove("hidden");

@@ -183,7 +183,6 @@ export class SpacetimeCube {
 
   setTrailOpacity(opacity) {
     this.trailOpacity = opacity;
-
     this.setScrub(this._t);
   }
 
