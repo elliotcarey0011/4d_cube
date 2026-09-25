@@ -66,7 +66,7 @@ async function loadVideo(file) {
     volumeInfo = volume;
 
     cube = new SpacetimeCube(volume, {
-      ghostCount: 48,
+      ghostCount: parseInt(dom.ghostCountSlider.value, 10),
       trailOpacity: parseFloat(dom.opacitySlider.value),
       motionThreshold: parseFloat(dom.motionSlider.value),
       shellOpacity: parseFloat(dom.shellOpacitySlider.value),
@@ -99,6 +99,7 @@ bindControls(dom, {
   onMotionThreshold: (v) => cube?.setMotionThreshold(v),
   onShellVisible: (v) => cube?.setShellVisible(v),
   onShellOpacity: (v) => cube?.setShellOpacity(v),
+  onGhostCount: (v) => cube?.setGhostCount(v),
   onTogglePlay: togglePlay,
   onCameraAngle: (name) => applyCameraAngle(camera, controls, name, INITIAL_CAMERA_DISTANCE),
   onFileSelected: loadVideo,

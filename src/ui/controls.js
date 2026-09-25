@@ -15,6 +15,7 @@ export function bindControls(dom, callbacks) {
     onTogglePlay,
     onCameraAngle,
     onFileSelected,
+    onGhostCount,
   } = callbacks;
 
   dom.canvas.addEventListener(
@@ -44,6 +45,11 @@ export function bindControls(dom, callbacks) {
   dom.shellOpacitySlider.addEventListener("input", () => {
     dom.shellOpacityReadout.textContent = dom.shellOpacitySlider.value;
     onShellOpacity(parseFloat(dom.shellOpacitySlider.value));
+  });
+
+  dom.ghostCountSlider.addEventListener("input", () => {
+    dom.ghostCountReadout.textContent = dom.ghostCountSlider.value;
+    onGhostCount(parseInt(dom.ghostCountSlider.value, 10));
   });
 
   dom.playPauseBtn.addEventListener("click", onTogglePlay);

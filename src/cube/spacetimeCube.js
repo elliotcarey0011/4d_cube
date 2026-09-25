@@ -29,7 +29,7 @@ export class SpacetimeCube {
     volumeResult,
     {
       width = 2.2,
-      ghostCount = 20,
+      ghostCount = 5,
       trailOpacity = 0.252,
       motionThreshold = 0.12,
       shellOpacity = 0.364,
@@ -146,31 +146,7 @@ export class SpacetimeCube {
     // is recomputed per-plane in setScrub() based on the current scrub position.
     this.ghostMaterials = [];
     this.ghostTimes = [];
-    const ghostGeo = quadGeometry(
-      [
-        [-hw, -hh, 0],
-        [hw, -hh, 0],
-        [hw, hh, 0],
-        [-hw, hh, 0],
-      ],
-      [
-        [0, 0],
-        [1, 0],
-        [1, 1],
-        [0, 1],
-      ]
-    );
-    for (let i = 0; i < ghostCount; i++) {
-      const t = ghostCount === 1 ? 0.5 : i / (ghostCount - 1);
-      const z = -hd + t * (2 * hd);
-      const mat = makeGhostMaterial(texture, t, 0, this.motionThreshold);
-      const mesh = new THREE.Mesh(ghostGeo, mat);
-      mesh.position.z = z;
-      this.group.add(mesh);
-      this.ghostMaterials.push(mat);
-      this.ghostTimes.push(t);
-      // if (i === 14) console.log(`Mesh id: ${mesh.id},mesh uuid: ${mesh.uuid}`);
-    }
+    this._buildGhosts(ghostCount);
 
     // Thin wireframe edge outline for readability, like the reference images.
     const edgeGeo = new THREE.BoxGeometry(2 * hw, 2 * hh, 2 * hd);
@@ -214,6 +190,48 @@ export class SpacetimeCube {
     for (const mesh of this.shellMeshes) mesh.visible = visible;
   }
 
+  setGhostCount(count) {
+    this.ghostCount = count;
+    // Rebuild ghost meshes based on the new count
+    for (const mesh of this.group.children.filter(c => c.isMesh && this.ghostMaterials.includes(c.material))) {
+      this.group.remove(mesh);
+      mesh.geometry.dispose();
+      mesh.material.dispose();
+    }
+    this.ghostMaterials = [];
+    this.ghostTimes = [];
+    this._buildGhosts(count);
+    this.setScrub(this._t);
+  }
+
+  // Builds the thin (x,y) frame planes stacked along the time (z) axis.
+  _buildGhosts(count) {
+    const { hw, hh, hd } = this.halfSize;
+    const ghostGeo = quadGeometry(
+      [
+        [-hw, -hh, 0],
+        [hw, -hh, 0],
+        [hw, hh, 0],
+        [-hw, hh, 0],
+      ],
+      [
+        [0, 0],
+        [1, 0],
+        [1, 1],
+        [0, 1],
+      ]
+    );
+    for (let i = 0; i < count; i++) {
+      const t = count === 1 ? 0.5 : i / (count - 1);
+      const z = -hd + t * (2 * hd);
+      const mat = makeGhostMaterial(this.texture, t, 0, this.motionThreshold);
+      const mesh = new THREE.Mesh(ghostGeo, mat);
+      mesh.position.z = z;
+      this.group.add(mesh);
+      this.ghostMaterials.push(mat);
+      this.ghostTimes.push(t);
+    }
+  }
   // Lower = show more of the frame (less filtering); higher = only pixels that
   // stand out from that spot's average color across the clip stay visible
   // (fireworks, moving subjects, ...). Applied live in the ghost shader, so no

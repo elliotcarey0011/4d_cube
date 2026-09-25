@@ -1,72 +1,77 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>4D Cube — spacetime video cube</title>
-    <link rel="stylesheet" href="/src/style.css" />
-  </head>
 
-  <body>
-    <div id="app">
-      <canvas id="scene"></canvas>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>4D Cube — spacetime video cube</title>
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
 
-      <div id="hud">
-        <div id="topbar">
-          <label class="btn" for="fileInput">Import video</label>
-          <input id="fileInput" type="file" accept="video/*" hidden />
-          <span id="fileName" class="filename"></span>
-          <div id="devTools" class="devTools hidden">
-            <label class="devLabel" for="devTestFileSelect">Dev test file</label>
-            <select id="devTestFileSelect" class="select">
-              <option value="test_video_1.mp4">test_video_1.mp4</option>
-              <option value="test_video_2.mp4">test_video_2.mp4</option>
-              <option value="test_video_3.mp4" selected>test_video_3.mp4</option>
-            </select>
-          </div>
-          <div class="spacer"></div>
-          <button id="playPauseBtn" class="btn" disabled>Play</button>
-          <div class="cameraAngle">
-            <button id="cameraAngleBtnDefault" class="btn">Default View</button>
-            <button id="cameraAngleBtnTop" class="btn">Top View</button>
-            <button id="cameraAngleBtnSide" class="btn">Side View</button>
-            <button id="cameraAngleBtnFront" class="btn">Front View</button>
-            <button id="cameraAngleBtnBack" class="btn">Back View</button>
-            <button id="cameraAngleBtnInside" class="btn">Inside View</button>
+<body>
+  <div id="app">
+    <canvas id="scene"></canvas>
+
+    <div id="hud">
+      <div id="topbar">
+        <label class="btn" for="fileInput">Import video</label>
+        <input id="fileInput" type="file" accept="video/*" hidden />
+        <span id="fileName" class="filename"></span>
+        <div id="devTools" class="devTools hidden">
+          <label class="devLabel" for="devTestFileSelect">Dev test file</label>
+          <select id="devTestFileSelect" class="select">
+            <option value="test_video_1.mp4">test_video_1.mp4</option>
+            <option value="test_video_2.mp4">test_video_2.mp4</option>
+            <option value="test_video_3.mp4" selected>test_video_3.mp4</option>
+          </select>
+        </div>
+        <div class="spacer"></div>
+        <button id="playPauseBtn" class="btn" disabled>Play</button>
+        <div class="cameraAngle">
+          <button id="cameraAngleBtnDefault" class="btn">Default View</button>
+          <button id="cameraAngleBtnTop" class="btn">Top View</button>
+          <button id="cameraAngleBtnSide" class="btn">Side View</button>
+          <button id="cameraAngleBtnFront" class="btn">Front View</button>
+          <button id="cameraAngleBtnBack" class="btn">Back View</button>
+          <button id="cameraAngleBtnInside" class="btn">Inside View</button>
+        </div>
+      </div>
+
+      <div id="loading" class="hidden">
+        <div class="loadingBox">
+          <div id="loadingLabel">Extracting frames…</div>
+          <div class="progressTrack">
+            <div id="progressFill" class="progressFill"></div>
           </div>
         </div>
+      </div>
 
-        <div id="loading" class="hidden">
-          <div class="loadingBox">
-            <div id="loadingLabel">Extracting frames…</div>
-            <div class="progressTrack">
-              <div id="progressFill" class="progressFill"></div>
-            </div>
-          </div>
+      <div id="controls" class="hidden">
+        <div class="row">
+          <span class="label">Time</span>
+          <input id="scrubSlider" type="range" min="0" max="1" step="0.001" value="0" />
+          <span id="scrubReadout" class="readout">0 / 0</span>
         </div>
-
-        <div id="controls" class="hidden">
-          <div class="row">
-            <span class="label">Time</span>
-            <input id="scrubSlider" type="range" min="0" max="1" step="0.001" value="0" />
-            <span id="scrubReadout" class="readout">0 / 0</span>
-          </div>
-          <div class="row">
-            <span class="label">Trail opacity</span>
-            <input id="opacitySlider" type="range" min="0" max="1" step="0.001" value="0.252" />
-            <span id="opacityReadout" class="readout">0.252</span>
-          </div>
-          <div class="row">
-            <span class="label">Shell</span>
-            <input id="shellCheckbox" type="checkbox" checked />
-            <input id="shellOpacitySlider" type="range" min="0" max="1" step="0.001" value="0.364" />
-            <span id="shellOpacityReadout" class="readout">0.364</span>
-          </div>
-          <div class="row">
-            <span class="label">Isolate motion</span>
-            <input id="motionSlider" type="range" min="0" max="1" step="0.01" value="0.12" />
-            <span id="motionReadout" class="readout">0.12</span>
-          </div>
+        <div class="row">
+          <span class="label">Trail opacity</span>
+          <input id="opacitySlider" type="range" min="0" max="1" step="0.001" value="0.252" />
+          <span id="opacityReadout" class="readout">0.252</span>
+        </div>
+        <div class="row">
+          <span class="label">Shell</span>
+          <input id="shellCheckbox" type="checkbox" checked />
+          <input id="shellOpacitySlider" type="range" min="0" max="1" step="0.001" value="0.364" />
+          <span id="shellOpacityReadout" class="readout">0.364</span>
+        </div>
+        <div class="row">
+          <span class="label">Isolate motion</span>
+          <input id="motionSlider" type="range" min="0" max="1" step="0.01" value="0.12" />
+          <span id="motionReadout" class="readout">0.12</span>
+        </div>
+        <div class="row">
+          <span class="label">Ghost count</span>
+          <input id="ghostCountSlider" type="range" min="1" max="20" step="1" value="6" />
+          <span id="ghostCountReadout" class="readout">6</span>
         </div>
 
         <div id="hint" class="hint">
@@ -76,5 +81,6 @@
       </div>
     </div>
     <script type="module" src="/src/main.js"></script>
-  </body>
+</body>
+
 </html>

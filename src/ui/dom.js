@@ -18,6 +18,8 @@ export const dom = {
   scrubReadout: document.getElementById("scrubReadout"),
   opacitySlider: document.getElementById("opacitySlider"),
   opacityReadout: document.getElementById("opacityReadout"),
+  ghostCountSlider: document.getElementById("ghostCountSlider"),
+  ghostCountReadout: document.getElementById("ghostCountReadout"),
   motionSlider: document.getElementById("motionSlider"),
   motionReadout: document.getElementById("motionReadout"),
   shellCheckbox: document.getElementById("shellCheckbox"),
