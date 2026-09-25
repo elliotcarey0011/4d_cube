@@ -27,7 +27,7 @@ function quadGeometry(corners, uvs) {
 export class SpacetimeCube {
   constructor(
     volumeResult,
-    { width = 2.2, ghostCount = 48, trailOpacity = 0.15, motionThreshold = 0.12, shellOpacity = 0.5, shellVisible = true } = {}
+    { width = 2.2, ghostCount = 20, trailOpacity = 0.252, motionThreshold = 0.12, shellOpacity = 0.364, shellVisible = true } = {}
   ) {
     const { texture, aspect, frameCount } = volumeResult;
     this.texture = texture;
