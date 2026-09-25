@@ -23,7 +23,12 @@ scene.background = new THREE.Color(0x050505);
 
 const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.01, 100);
 const initialDistance = 4.2;
-camera.position.set(2.6, 1.9, 3.1).setLength(initialDistance);
+// camera.position.set(2.6, 1.9, 3.1).setLength(initialDistance);
+camera.position.set(-0.3077470688101377, 0.5111020212327323, 4.157411029177814).setLength(initialDistance);
+camera.rotation.set(-3.11897818410284, 0.09298387281643143, 3.1394925464996564);
+// controls.target.set(0, 0, 0);
+// controls.update();
+
 
 // Camera is driven directly by mouse/trackpad via OrbitControls: drag to orbit,
 // scroll/pinch to zoom (including flying all the way through the cube's faces
@@ -162,7 +167,9 @@ async function loadVideo(file) {
 
     scrubT = 0;
     setScrub(0);
-    camera.position.set(2.6, 1.9, 3.1).setLength(initialDistance);
+    // camera.position.set(2.6, 1.9, 3.1).setLength(initialDistance);
+    camera.position.set(-0.3077470688101377, 0.5111020212327323, 4.157411029177814).setLength(initialDistance);
+    camera.rotation.set(-3.11897818410284, 0.09298387281643143, 3.1394925464996564);
     controls.target.set(0, 0, 0);
 
     controlsEl.classList.remove("hidden");
