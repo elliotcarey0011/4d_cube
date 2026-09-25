@@ -25,13 +25,14 @@ function quadGeometry(corners, uvs) {
  * in the cube corresponds to where you are in the video, not pinned to any face.
  */
 export class SpacetimeCube {
-  constructor(volumeResult, { width = 2.2, ghostCount = 48, trailOpacity = 0.15 } = {}) {
+  constructor(volumeResult, { width = 2.2, ghostCount = 48, trailOpacity = 0.15, motionThreshold = 0.12 } = {}) {
     const { texture, aspect, frameCount } = volumeResult;
     this.texture = texture;
     this.frameCount = frameCount;
     this.trailOpacity = trailOpacity;
     this.peakOpacity = 0.9;
     this.peakWidth = 0.05;
+    this.motionThreshold = motionThreshold;
     this._t = 0;
 
     const hw = width / 2;
@@ -150,7 +151,7 @@ export class SpacetimeCube {
     for (let i = 0; i < ghostCount; i++) {
       const t = ghostCount === 1 ? 0.5 : i / (ghostCount - 1);
       const z = -hd + t * (2 * hd);
-      const mat = makeGhostMaterial(texture, t, 0);
+      const mat = makeGhostMaterial(texture, t, 0, this.motionThreshold);
       const mesh = new THREE.Mesh(ghostGeo, mat);
       mesh.position.z = z;
       this.group.add(mesh);
@@ -190,6 +191,15 @@ export class SpacetimeCube {
   setTrailOpacity(opacity) {
     this.trailOpacity = opacity;
     this.setScrub(this._t);
+  }
+
+  // Lower = show more of the frame (less filtering); higher = only pixels that
+  // stand out from that spot's average color across the clip stay visible
+  // (fireworks, moving subjects, ...). Applied live in the ghost shader, so no
+  // re-extraction is needed when you move this.
+  setMotionThreshold(threshold) {
+    this.motionThreshold = threshold;
+    for (const mat of this.ghostMaterials) mat.uniforms.uMotionThreshold.value = threshold;
   }
 
   dispose() {

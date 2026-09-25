@@ -38,6 +38,11 @@ export async function buildVideoVolume(file, { onProgress, anisotropy } = {}) {
   ctx.imageSmoothingQuality = "high";
 
   const data = new Uint8Array(texW * texH * 4 * frameCount);
+  const pixelCount = texW * texH;
+  // Running per-pixel RGB sum across every sampled frame, used afterwards to
+  // derive a "background" estimate so we can tell which pixels are actually
+  // changing (fireworks, motion, ...) from which are just the static backdrop.
+  const rgbSum = new Float64Array(pixelCount * 3);
 
   for (let i = 0; i < frameCount; i++) {
     const t = frameCount === 1 ? 0 : (i / (frameCount - 1)) * (duration - 0.001);
@@ -49,7 +54,7 @@ export async function buildVideoVolume(file, { onProgress, anisotropy } = {}) {
 
     // Data3DTexture layer i; flip rows so v=0 is the bottom of the image (matches
     // standard GL texture V convention used by the plane UVs in the shaders).
-    const layerOffset = i * texW * texH * 4;
+    const layerOffset = i * pixelCount * 4;
     for (let row = 0; row < texH; row++) {
       const srcRow = texH - 1 - row;
       const srcStart = srcRow * texW * 4;
@@ -57,9 +62,36 @@ export async function buildVideoVolume(file, { onProgress, anisotropy } = {}) {
       data.set(frame.subarray(srcStart, srcStart + texW * 4), dstStart);
     }
 
+    for (let p = 0; p < pixelCount; p++) {
+      const o = layerOffset + p * 4;
+      rgbSum[p * 3] += data[o];
+      rgbSum[p * 3 + 1] += data[o + 1];
+      rgbSum[p * 3 + 2] += data[o + 2];
+    }
+
     onProgress?.((i + 1) / frameCount);
     // Yield to the event loop so the progress bar can repaint.
     await new Promise((r) => setTimeout(r, 0));
+  }
+
+  // The alpha channel is otherwise unused by the shaders (they set their own
+  // opacity), so repurpose it to store a per-pixel "distance from background"
+  // value: near 0 where a pixel looks like the scene's average color at that
+  // spot, near 1 where it stands out (motion, flashes, anything transient).
+  // The ghost-plane shader uses this to isolate contrasting/moving elements.
+  const maxDist = Math.sqrt(3 * 255 * 255);
+  for (let p = 0; p < pixelCount; p++) {
+    const br = rgbSum[p * 3] / frameCount;
+    const bg = rgbSum[p * 3 + 1] / frameCount;
+    const bb = rgbSum[p * 3 + 2] / frameCount;
+    for (let i = 0; i < frameCount; i++) {
+      const o = i * pixelCount * 4 + p * 4;
+      const dr = data[o] - br;
+      const dg = data[o + 1] - bg;
+      const db = data[o + 2] - bb;
+      const dist = Math.sqrt(dr * dr + dg * dg + db * db);
+      data[o + 3] = Math.min(255, Math.round((dist / maxDist) * 255));
+    }
   }
 
   URL.revokeObjectURL(url);

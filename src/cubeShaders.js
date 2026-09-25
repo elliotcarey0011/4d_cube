@@ -86,14 +86,20 @@ const ghostFragmentShader = /* glsl */ `
   uniform sampler3D uVolume;
   uniform float uT;
   uniform float uOpacity;
+  uniform float uMotionThreshold;
+  uniform float uMotionSoftness;
 
   void main() {
     vec4 c = texture(uVolume, vec3(vUv.x, vUv.y, uT));
-    fragColor = vec4(c.rgb, uOpacity);
+    // c.a holds the pre-computed "distance from this pixel's average color
+    // across the whole clip" (see volume.js) — isolates contrasting/moving
+    // elements (fireworks, motion) from a mostly-static background.
+    float mask = smoothstep(uMotionThreshold, uMotionThreshold + uMotionSoftness, c.a);
+    fragColor = vec4(c.rgb, uOpacity * mask);
   }
 `;
 
-export function makeGhostMaterial(volumeTexture, t, opacity) {
+export function makeGhostMaterial(volumeTexture, t, opacity, motionThreshold = 0) {
   return new THREE.RawShaderMaterial({
     glslVersion: THREE.GLSL3,
     vertexShader: ghostVertexShader,
@@ -102,6 +108,8 @@ export function makeGhostMaterial(volumeTexture, t, opacity) {
       uVolume: { value: volumeTexture },
       uT: { value: t },
       uOpacity: { value: opacity },
+      uMotionThreshold: { value: motionThreshold },
+      uMotionSoftness: { value: 0.08 },
     },
     side: THREE.DoubleSide,
     transparent: true,

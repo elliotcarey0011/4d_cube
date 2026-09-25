@@ -20,6 +20,8 @@ const scrubSlider = document.getElementById("scrubSlider");
 const scrubReadout = document.getElementById("scrubReadout");
 const opacitySlider = document.getElementById("opacitySlider");
 const opacityReadout = document.getElementById("opacityReadout");
+const motionSlider = document.getElementById("motionSlider");
+const motionReadout = document.getElementById("motionReadout");
 const cameraAngleData = {
   default: { position: { x: 0.010609190706706788, y: 0.12755578234996182, z: 4.198049185926895 }, rotation: { x: -0.030375239798919502, y: 0.002526044433327428, z: 0.00007675273054140423 }, quaternion: { x: -0.015186975444693626, y: 0.001263459038798053, z: 0.000019190349919260052, w: 0.9998838727971513 } },
   top: { position: { x: 6.839953855022529e-7, y: 4.181084720495978, z: 0.000004124945316656096 }, rotation: { x: -1.5707953402218915, y: 1.635928069537725e-7, z: 0.16432406181140152 }, quaternion: { x: -0.7047210738653937, y: 0.05803201498745092, z: 0.05803195695288546, w: 0.7047217786181443 } },
@@ -122,6 +124,10 @@ opacitySlider.addEventListener("input", () => {
   cube?.setTrailOpacity(parseFloat(opacitySlider.value));
   updateOpacityUI();
 });
+motionSlider.addEventListener("input", () => {
+  cube?.setMotionThreshold(parseFloat(motionSlider.value));
+  motionReadout.textContent = motionSlider.value;
+});
 
 function togglePlay() {
   if (!cube) return;
@@ -195,21 +201,16 @@ async function loadVideo(file) {
     });
     volumeInfo = volume;
 
-    cube = new SpacetimeCube(volume, { ghostCount: 48, trailOpacity: parseFloat(opacitySlider.value) });
+    cube = new SpacetimeCube(volume, {
+      ghostCount: 48,
+      trailOpacity: parseFloat(opacitySlider.value),
+      motionThreshold: parseFloat(motionSlider.value),
+    });
     scene.add(cube.group);
 
     scrubT = 0;
     setScrub(0);
-    // camera.position.set(2.6, 1.9, 3.1).setLength(initialDistance);
-    // camera.position.set(0.010609190706706788, 0.12755578234996182, 4.198049185926895).setLength(initialDistance);
-    // camera.rotation.set(-0.030375239798919502, 0.002526044433327428, 0.00007675273054140423);
-    // camera.quaternion.set(
-    //   -0.015186975444693626,
-    //   0.001263459038798053,
-    //   0.000019190349919260052,
-    //   0.9998838727971513
-    // );
-    // controls.target.set(0, 0, 0);
+
 
     controlsEl.classList.remove("hidden");
     playPauseBtn.disabled = false;
