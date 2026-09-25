@@ -4,6 +4,8 @@ A browser toy that turns a video into a "spacetime cube": every frame is
 stacked along a depth (time) axis so you can orbit around — and fly straight
 through — the video's own timeline.
 
+preview: https://4d-cube-ruddy.vercel.app/
+
 ## How it works
 
 The video is decoded client-side into a 3D volume texture indexed by
