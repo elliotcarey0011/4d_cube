@@ -25,7 +25,7 @@ const cameraAngleData = {
   top: { position: { x: 6.839953855022529e-7, y: 4.181084720495978, z: 0.000004124945316656096 }, rotation: { x: -1.5707953402218915, y: 1.635928069537725e-7, z: 0.16432406181140152 }, quaternion: { x: -0.7047210738653937, y: 0.05803201498745092, z: 0.05803195695288546, w: 0.7047217786181443 } },
   side: { position: { x: 3.995191373531822, y: 0.27019467522747037, z: 1.2670598748029005 }, rotation: { x: -0.21009846853832595, y: 1.257218536946953, z: 0.20013126611614884 }, quaternion: { x: -0.025969538638100958, y: 0.5903262841656844, z: 0.01900814183279582, w: 0.8065228774375369 } },
   front: { position: { x: 0.010609190706706788, y: 0.12755578234996182, z: 4.198049185926895 }, rotation: { x: -0.030375239798919502, y: 0.002526044433327428, z: 0.00007675273054140423 }, quaternion: { x: -0.015186975444693626, y: 0.001263459038798053, z: 0.000019190349919260052, w: 0.9998838727971513 } },
-  inside: { position: { x: 0.7326603834680702, y: 0.15130194485527834, z: 2.2980786622064957 }, rotation: { x: -0.06574357000443642, y: 0.30800170730804705, z: 0.01995660573620204 }, quaternion: { x: -0.030945542352497368, y: 0.1536264139291691, z: 0.004813584281445624, w: 0.9876325874322591 } }
+  inside: { position: { x: 1.7947030376558417, y: 0.13907425204857435, z: 1.5840628054600756 }, rotation: { x: -0.08757137741386092, y: 0.845754716264015, z: 0.06561843109175682 }, quaternion: { x: -0.026445324978521617, y: 0.41108144297754445, z: 0.011931448638151624, w: 0.9111368352556467 }, zoom: 2 }
 };
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -54,8 +54,13 @@ function applyCameraAngle(name, distance = initialDistance) {
   if (!angle) return;
 
   camera.position.copy(angle.position).setLength(distance);
+  if (angle.zoom !== undefined) {
+    camera.zoom = angle.zoom;
+  } else {
+    camera.zoom = 1;
+  }
+  camera.updateProjectionMatrix();
   controls.target.set(0, 0, 0);
-
 }
 applyCameraAngle("default");
 // While Shift is held, hand the wheel over to frame-scrubbing instead of camera zoom.
